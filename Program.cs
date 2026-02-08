@@ -8,8 +8,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
-string? secretKey = jwtSettings["Secret"];
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["Secret"];
+var googleAuth = builder.Configuration.GetSection("Authentication:Google");
 
 // Add services to the container.
 
@@ -18,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<LoginContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUserService, UserServices>();
+builder.Services.AddScoped<TokenServices>();
 
 builder.Services.AddAuthentication(opt =>
 {
