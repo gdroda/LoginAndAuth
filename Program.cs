@@ -1,5 +1,6 @@
 using LoginAndAuth.Data;
 using LoginAndAuth.Services;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -24,7 +25,8 @@ builder.Services.AddScoped<TokenServices>();
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
     .AddJwtBearer(opt =>
     {
@@ -38,8 +40,12 @@ builder.Services.AddAuthentication(opt =>
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
+    })
+    .AddGoogle(opt =>
+    {
+        opt.ClientId = googleAuth["ClientId"];
+        opt.ClientSecret = googleAuth["ClientSecret"];
     });
-
 
 
 var app = builder.Build();
