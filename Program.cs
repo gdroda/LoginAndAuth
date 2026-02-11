@@ -47,6 +47,12 @@ builder.Services.AddAuthentication(opt =>
         opt.ClientSecret = googleAuth["ClientSecret"];
     });
 
+builder.Services.AddCors(opt => opt.AddPolicy("MyCorsPolicy", policy =>
+{
+    policy.WithOrigins("http://localhost:52565").AllowAnyMethod().AllowAnyHeader();
+    //policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+}));
+
 
 var app = builder.Build();
 
@@ -56,11 +62,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+app.UseCors("MyCorsPolicy");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
