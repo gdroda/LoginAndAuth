@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Security.Claims;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"];
@@ -22,11 +25,12 @@ builder.Services.AddDbContext<LoginContext>(opt => opt.UseSqlServer(builder.Conf
 builder.Services.AddScoped<IUserService, UserServices>();
 builder.Services.AddScoped<TokenServices>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    opt.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
     .AddJwtBearer(opt =>
     {
@@ -71,6 +75,12 @@ app.UseCors("MyCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    await next();
+});
 
 app.MapControllers();
 
