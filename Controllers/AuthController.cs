@@ -35,12 +35,6 @@ namespace LoginAndAuth.Controllers
             return Unauthorized();
         }
 
-        [HttpGet("ping")]
-        [AllowAnonymous]
-        public IActionResult Ping()
-        {
-            return Ok("Pong");
-        }
 
         [AllowAnonymous]
         [HttpPost("google")]
