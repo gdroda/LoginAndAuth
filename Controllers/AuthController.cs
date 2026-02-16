@@ -1,10 +1,13 @@
 ﻿using Google.Apis.Auth;
 using LoginAndAuth.Models;
 using LoginAndAuth.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 
 namespace LoginAndAuth.Controllers
@@ -34,6 +37,37 @@ namespace LoginAndAuth.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpGet("login")]
+        public async Task<IActionResult> GoogleLogin()
+        {
+            return Challenge(new AuthenticationProperties
+            {
+                RedirectUri = "/api/auth/callback"
+            }, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("callback")]
+        public async Task<IActionResult> GoogleCallback()
+        {
+            return Redirect("http://localhost:52565/");
+        }
+
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUser()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return Ok(new
+                {
+                    Name = User.Identity.Name,
+                    Email = User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value
+                });
+            }
+            return Unauthorized();
+        }
+
+
 
 
         [AllowAnonymous]
